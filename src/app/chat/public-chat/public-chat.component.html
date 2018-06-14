@@ -1,4 +1,4 @@
-<div class="pane">
+<div class="pane chat-window">
   <form #chatForm="ngForm" (submit)="onChat()">
     <div class="form-group">
       <input type="text" class="form-control" name="chat" ngModel required>
@@ -7,7 +7,7 @@
       </button>
     </div>
   </form>
-  <div class="badge-pill" *ngFor="let msg of messages">
+  <div class="chat-message" *ngFor="let msg of messages" [ngClass]="{'own-message': name === msg.name}">
     {{ msg.name }}: {{ msg.content }}
   </div>
 </div>

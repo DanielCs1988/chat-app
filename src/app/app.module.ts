@@ -10,11 +10,12 @@ import {FormsModule} from '@angular/forms';
 import {ChatService} from './services/chat.service';
 import { PrivateChatComponent } from './chat/private-chat/private-chat.component';
 import { PublicChatComponent } from './chat/public-chat/public-chat.component';
+import {AuthGuard} from './services/auth-guard';
 
 const routes: Routes = [
   {path: 'login', component: LoginComponent},
-  {path: 'chat', component: ChatComponent, children: [
-    {path: '', pathMatch: 'full', component: PublicChatComponent},
+  {path: 'chat', component: ChatComponent, canActivate: [AuthGuard], children: [
+    {path: 'public', component: PublicChatComponent},
     {path: ':name', component: PrivateChatComponent}
   ]},
   {path: '', redirectTo: 'login', pathMatch: 'full'}
@@ -35,7 +36,8 @@ const routes: Routes = [
   ],
   providers: [
     SocketClient,
-    ChatService
+    ChatService,
+    AuthGuard
   ],
   bootstrap: [AppComponent]
 })

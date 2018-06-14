@@ -7,10 +7,10 @@ import {Message} from '../chat/message.model';
 export class ChatService {
 
   private url = "ws://192.168.0.104:8080";
-  private name: string;
+  name: string;
   onMessage = new EventEmitter<Message[]>();
   onPrivateMsg = new EventEmitter<{name: string, messages: Message[]}>();
-  onJoin = new EventEmitter<string[]>();
+  onUserChange = new EventEmitter<string[]>();
   publicMessages: Message[] = [];
   privateMessages = new Map<string, Message[]>();
   names: string[] = [];
@@ -27,11 +27,7 @@ export class ChatService {
   setName(name: string) {
     this.socket.send('name', name);
     this.name = name;
-    this.router.navigate(['/chat']);
-  }
-
-  getName() {
-    return this.name ? this.name : 'Too soon Executus!!!';
+    this.router.navigate(['/chat/public']);
   }
 
   sendMessage(msg: string) {
@@ -44,8 +40,8 @@ export class ChatService {
   }
 
   private onNewName(names: string[]) {
-    this.names = names;
-    this.onJoin.emit(this.names.slice());
+    this.names = names.filter(name => name !== this.name);
+    this.onUserChange.emit(this.names.slice());
   }
 
   sendPrivateMsg(target: string, msg: string) {

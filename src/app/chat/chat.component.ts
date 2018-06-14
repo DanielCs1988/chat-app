@@ -16,8 +16,8 @@ export class ChatComponent implements OnInit {
   constructor(private chat: ChatService, private router: Router) { }
 
   ngOnInit() {
-    this.name = this.chat.getName();
+    this.name = this.chat.name;
     this.names = this.chat.names;
-    this.chat.onJoin.subscribe(names => this.names = names);
+    this.chat.onUserChange.subscribe(names => this.names = names);
   }
 }

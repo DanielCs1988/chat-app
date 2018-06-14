@@ -11,11 +11,13 @@ import {NgForm} from '@angular/forms';
 export class PublicChatComponent implements OnInit {
 
   messages: Message[] = [];
+  name: string;
   @ViewChild('chatForm') chatForm: NgForm;
 
   constructor(private chat: ChatService) { }
 
   ngOnInit() {
+    this.name = this.chat.name;
     this.messages = this.chat.publicMessages;
     this.chat.onMessage.subscribe(messages => this.messages = messages);
   }

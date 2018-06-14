@@ -8,10 +8,18 @@ textarea {
   resize: none;
 }
 
-a:hover {
-  cursor: pointer;
-  text-decoration: underline;
-  font-weight: bold;
+.chat-message {
+  padding: 0.15rem 0.3rem;
+  margin: 0.5rem 0.5rem 0.2rem auto;
+  background: green;
+  color: white;
+  border-radius: 10px;
+  width: fit-content;
+
+  &.own-message {
+    background: darkgreen;
+    margin: 0.5rem 0.5rem;
+  }
 }
 
 .pane {

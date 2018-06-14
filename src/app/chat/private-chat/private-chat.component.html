@@ -1,4 +1,4 @@
-<div class="pane">
+<div class="pane chat-window">
   <h2>Chat with {{ target }}</h2>
   <form #chatForm="ngForm" (submit)="onChat()">
     <div class="form-group">
@@ -8,7 +8,7 @@
       </button>
     </div>
   </form>
-  <div class="badge-pill" *ngFor="let msg of messages">
+  <div class="chat-message" *ngFor="let msg of messages" [ngClass]="{'own-message': target !== msg.name}">
     {{ msg.name }}: {{ msg.content }}
   </div>
 </div>

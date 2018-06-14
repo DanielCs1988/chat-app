@@ -7,6 +7,7 @@ export class SocketClient {
     private onCloseHandler: Function;
     private cache: Transaction[] = [];
     private isOpen = false;
+    private isClosed = false;
 
     constructor() {
         setInterval(() => {
@@ -25,6 +26,14 @@ export class SocketClient {
         this.socket.addEventListener('message', event => this.processMessage(event.data));
     }
 
+    disconnect() {
+        if (this.socket) {
+            this.isClosed = true;
+            this.cache = [];
+            this.socket.close();
+        }
+    }
+
     private onOpenConnection(event: any) {
         this.isOpen = true;
         if (this.onOpenHandler) this.onOpenHandler.call(null, event);
@@ -33,7 +42,7 @@ export class SocketClient {
     private onClosedConnection(event: any, url: string) {
         this.isOpen = false;
         if (this.onCloseHandler) this.onCloseHandler.call(null, event);
-        if (event.wasClean) { return; }
+        if (this.isClosed) { return; }
         setTimeout(() => {
             this.connect(url);
         }, 10000);
