@@ -1,0 +1,23 @@
+<h1>Oh hai {{ name }}!</h1>
+<div class="row mt-5">
+  <div class="col-md-6">
+    <router-outlet></router-outlet>
+  </div>
+  <div class="col-md-3">
+    <div class="pane">
+      <div class="name" *ngFor="let name of names">
+        <a [routerLink]="name">{{ name }}</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <a class="btn btn-outline-info btn-block mb-3" routerLink="/chat">
+      Commons
+    </a>
+    <div class="pane">
+      <div class="chat-space" *ngFor="let room of rooms">
+        <a [routerLink]="room">{{ room }}</a>
+      </div>
+    </div>
+  </div>
+</div>

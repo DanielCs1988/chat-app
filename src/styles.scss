@@ -1,0 +1,57 @@
+$fancy-shadow: 0 3px 1px -2px rgba(0, 0, 0, .2), 0 2px 2px 0 rgba(0, 0, 0, .14), 0 1px 5px 0 rgba(0, 0, 0, .12);
+
+@mixin colored-shadow($color) {
+  box-shadow: 1px 1px 5px 2px rgba($color, 0.6);
+}
+
+textarea {
+  resize: none;
+}
+
+a:hover {
+  cursor: pointer;
+  text-decoration: underline;
+  font-weight: bold;
+}
+
+.pane {
+  padding: 10px;
+  border-radius: 3px;
+  box-shadow: $fancy-shadow;
+}
+.center-block {
+  width: 30rem;
+  margin: 0 auto
+}
+
+input + .helper-text {
+  display: none;
+}
+
+.form-control {
+
+  &.ng-invalid.ng-touched {
+    border: 1px solid red;
+    @include colored-shadow(red);
+  }
+
+  &.ng-invalid.ng-touched + .helper-text {
+    display: block;
+  }
+
+  &.ng-pending {
+    animation: flashingBorder 1s infinite;
+  }
+}
+@keyframes flashingBorder {
+  0% {
+    box-shadow: none;
+  }
+  50% {
+    box-shadow: 1px 1px 5px 3px purple;
+  }
+  100% {
+    box-shadow: none;
+  }
+}
+
