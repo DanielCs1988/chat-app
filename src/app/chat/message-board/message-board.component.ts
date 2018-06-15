@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Message} from '../message.model';
 import {NgForm} from '@angular/forms';
 import {ActivatedRoute, Params} from '@angular/router';
@@ -10,7 +10,7 @@ import {Subscription} from 'rxjs';
   templateUrl: './message-board.component.html',
   styleUrls: ['./message-board.component.css']
 })
-export class MessageBoardComponent implements OnInit {
+export class MessageBoardComponent implements OnInit, OnDestroy {
 
   name: string;
   target: string;
@@ -36,6 +36,11 @@ export class MessageBoardComponent implements OnInit {
       }
     });
   }
+
+  ngOnDestroy(): void {
+    this.channelSubscription.unsubscribe();
+  }
+
 
   private onPublicChat() {
     this.messages = this.chat.publicMessages;
