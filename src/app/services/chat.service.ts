@@ -13,6 +13,7 @@ export class ChatService {
   onMessage = new EventEmitter<Message[]>();
   onPrivateMsg = new EventEmitter<{name: string, messages: Message[]}>();
   onUserChange = new EventEmitter<string[]>();
+  onRoomChat = new EventEmitter<Message>();
   publicMessages: Message[] = [];
   privateMessages = new Map<string, Message[]>();
   names: string[] = [];
@@ -24,12 +25,13 @@ export class ChatService {
     socket.on('chat', (msg: Message) => this.onChat(msg));
     socket.on('name', (names: string[]) => this.onNewName(names));
     socket.on('private', (msg: Message) => this.receivePrivateMsg(msg));
+    socket.on('room/chat', (msg: Message) => this.onRoomChat.emit(msg))
   }
 
   setName(name: string) {
     this.socket.send('name', name);
     this.name = name;
-    this.router.navigate(['/chat/public']);
+    this.router.navigate(['/chat']);
   }
 
   sendMessage(msg: string) {
@@ -50,6 +52,18 @@ export class ChatService {
     const message = new Message(this.name, msg);
     this.updatePrivateMessages(target, message);
     this.socket.send('private', new Message(target, msg));
+  }
+
+  sendToRoom(msg: string) {
+    this.socket.send('room/chat', msg);
+  }
+
+  joinRoom(room: string) {
+    this.socket.send('room/join', room);
+  }
+
+  leaveRoom(room: string) {
+    this.socket.send('room/leave', room);
   }
 
   private updatePrivateMessages(target: string, message: Message) {

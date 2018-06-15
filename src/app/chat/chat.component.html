@@ -3,34 +3,7 @@
     <h2 class="text-center">Oh hai {{ name }}!</h2>
     <router-outlet></router-outlet>
   </div>
-  <div class="col-md-3">
-
-    <div class="pane">
-      <h5 class="text-center" *ngIf="names.length === 0">No users are currently logged in.</h5>
-      <ul class="nav nav-pills flex-column">
-        <li class="nav-item" *ngFor="let name of names">
-          <a class="nav-link" [routerLink]="name" routerLinkActive="active">
-            {{ name }}
-          </a>
-        </li>
-      </ul>
-    </div>
-
-  </div>
-  <div class="col-md-3">
-
-    <a class="btn btn-outline-info btn-block mb-3" routerLink="public" routerLinkActive="active">
-      Commons
-    </a>
-    <div class="pane">
-      <ul class="nav nav-pills flex-column">
-        <li class="nav-item" *ngFor="let room of rooms">
-          <a class="nav-link" [routerLink]="room" routerLinkActive="active">
-            {{ room }}
-          </a>
-        </li>
-      </ul>
-    </div>
-
+  <div class="col-md-6">
+    <app-navigation></app-navigation>
   </div>
 </div>

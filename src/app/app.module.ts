@@ -8,17 +8,18 @@ import {LoginComponent} from './login/login.component';
 import {ChatComponent} from './chat/chat.component';
 import {FormsModule} from '@angular/forms';
 import {ChatService} from './services/chat.service';
-import { PrivateChatComponent } from './chat/private-chat/private-chat.component';
-import { PublicChatComponent } from './chat/public-chat/public-chat.component';
 import {AuthGuard} from './services/auth-guard';
+import { NavigationComponent } from './chat/navigation/navigation.component';
+import { MessageBoardComponent } from './chat/message-board/message-board.component';
 
 const routes: Routes = [
   {path: 'login', component: LoginComponent},
   {path: 'chat', component: ChatComponent, canActivate: [AuthGuard], children: [
-    {path: 'public', component: PublicChatComponent},
-    {path: ':name', component: PrivateChatComponent}
+    {path: '', component: MessageBoardComponent, pathMatch: 'full'},
+    {path: ':name', component: MessageBoardComponent},
+    {path: 'room/:room', component: MessageBoardComponent}
   ]},
-  {path: '', redirectTo: 'login', pathMatch: 'full'}
+  {path: '**', redirectTo: 'login'}
 ];
 
 @NgModule({
@@ -26,8 +27,8 @@ const routes: Routes = [
     AppComponent,
     LoginComponent,
     ChatComponent,
-    PrivateChatComponent,
-    PublicChatComponent
+    NavigationComponent,
+    MessageBoardComponent
   ],
   imports: [
     BrowserModule,
