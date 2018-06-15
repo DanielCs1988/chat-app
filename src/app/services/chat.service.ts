@@ -6,7 +6,9 @@ import {Message} from '../chat/message.model';
 @Injectable()
 export class ChatService {
 
-  private url = "ws://192.168.0.104:8080";
+  private domain = 'localhost';
+  private port = 8080;
+
   name: string;
   onMessage = new EventEmitter<Message[]>();
   onPrivateMsg = new EventEmitter<{name: string, messages: Message[]}>();
@@ -16,7 +18,7 @@ export class ChatService {
   names: string[] = [];
 
   constructor(private socket: SocketClient, private router: Router) {
-    socket.connect(this.url);
+    socket.connect(this.domain, this.port);
     socket.on('open', () => console.info('Connected to server!'));
     socket.on('close', () => console.warn('Lost connection!'));
     socket.on('chat', (msg: Message) => this.onChat(msg));

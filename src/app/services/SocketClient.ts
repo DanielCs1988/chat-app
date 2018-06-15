@@ -18,11 +18,12 @@ export class SocketClient {
         }, 100);
     }
 
-    connect(url: string) {
+    connect(domain: string, port: number, token?: string) {
         if (this.isOpen) return;
+        const url = token ? `ws://${domain}:${port}/${token}` : `ws://${domain}:${port}`;
         this.socket = new WebSocket(url);
         this.socket.addEventListener('open', (ev) => this.onOpenConnection(ev));
-        this.socket.addEventListener('close', (ev) => this.onClosedConnection(ev, url));
+        this.socket.addEventListener('close', (ev) => this.onClosedConnection(ev, domain, port, token));
         this.socket.addEventListener('message', event => this.processMessage(event.data));
     }
 
@@ -39,12 +40,12 @@ export class SocketClient {
         if (this.onOpenHandler) this.onOpenHandler.call(null, event);
     }
 
-    private onClosedConnection(event: any, url: string) {
+    private onClosedConnection(event: any, domain: string, port: number, token?: string) {
         this.isOpen = false;
         if (this.onCloseHandler) this.onCloseHandler.call(null, event);
         if (this.isClosed) { return; }
         setTimeout(() => {
-            this.connect(url);
+            this.connect(domain, port, token);
         }, 10000);
     }
 
