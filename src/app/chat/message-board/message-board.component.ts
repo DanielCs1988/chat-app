@@ -46,7 +46,6 @@ export class MessageBoardComponent implements OnInit, OnDestroy {
     this.messages = this.chat.publicMessages;
     this.channelSubscription = this.chat.onMessage.subscribe(messages => {
       this.messages = messages;
-      console.log('Public chat called');
     });
   }
 
@@ -54,7 +53,6 @@ export class MessageBoardComponent implements OnInit, OnDestroy {
     this.target = target;
     this.messages = this.chat.privateMessages.get(target);
     this.channelSubscription = this.chat.onPrivateMsg.subscribe(msg => {
-      console.log('Private chat called');
       if (msg.name === target) {
         this.messages = msg.messages;
       }
@@ -66,7 +64,6 @@ export class MessageBoardComponent implements OnInit, OnDestroy {
     this.chat.joinRoom(room);
     this.channelSubscription = this.chat.onRoomChat.subscribe((msg: Message) => {
       this.messages.push(msg);
-      console.log('Room chat called');
     });
   }
 
