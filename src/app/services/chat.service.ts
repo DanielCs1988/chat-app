@@ -28,7 +28,7 @@ export class ChatService {
     socket.connect(this.domain, this.port);
     socket.on('close', () => console.warn('Lost connection!'));
     socket.on('chat', (msg: Message) => this.onChat(msg));
-    socket.on('name', (names: string[]) => this.onNewName(names));
+    socket.on('users', (names: string[]) => this.onNewName(names));
     socket.on('private', (msg: Message) => this.receivePrivateMsg(msg));
     socket.on('room/chat', (msg: Message) => this.onRoomChat.emit(msg));
   }
@@ -58,11 +58,7 @@ export class ChatService {
   }
 
   joinRoom(room: string) {
-    this.socket.send('room/join', room);
-  }
-
-  leaveRoom(room: string) {
-    this.socket.send('room/leave', room);
+    this.socket.send('join', room);
   }
 
   private updatePrivateMessages(target: string, message: Message) {

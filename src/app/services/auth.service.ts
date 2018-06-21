@@ -85,10 +85,11 @@ export class AuthService {
           profile.family_name,
           profile.picture
         );
-        this.userJoined.emit(self.userProfile.givenName);  // Move this down when server is alive
-        this.router.navigate(['/chat']);
-        this.socket.send('user/connect', self.userProfile, (user: User) => {
-          this.userProfile = user;
+        this.socket.send('login', self.userProfile, (extraInfo: ExtraInfo) => {
+          this.userProfile.nickName = extraInfo.nickName;
+          this.userProfile.introduction = extraInfo.introduction;
+          this.userJoined.emit(self.userProfile.givenName);
+          this.router.navigate(['/chat']);
         });
       }
     });
@@ -102,4 +103,9 @@ export class AuthService {
   static getToken() {
     return localStorage.getItem('access_token');
   }
+}
+
+interface ExtraInfo {
+  nickName: string;
+  introduction: string;
 }
