@@ -4,6 +4,7 @@ import {NgForm} from '@angular/forms';
 import {ActivatedRoute, Params} from '@angular/router';
 import {ChatService} from '../../services/chat.service';
 import {Subscription} from 'rxjs';
+import {AuthService} from '../../services/auth.service';
 
 @Component({
   selector: 'app-message-board',
@@ -17,12 +18,16 @@ export class MessageBoardComponent implements OnInit, OnDestroy {
   room: string;
   messages: Message[] = [];
   private channelSubscription: Subscription;
+  private $chatWindow;
   @ViewChild('chatForm') chatForm: NgForm;
 
-  constructor(private route: ActivatedRoute, private chat: ChatService) { }
+  constructor(private route: ActivatedRoute, private chat: ChatService, private authService: AuthService) { }
 
   ngOnInit() {
-    this.name = this.chat.name;
+    this.name = this.authService.userProfile ? this.authService.userProfile.givenName : '';
+    this.authService.userJoined.subscribe(name => this.name = name);
+    this.$chatWindow = document.querySelector('.chat-window');
+
     this.route.params.subscribe((params: Params) => {
       this.resetComponent();
       if (Object.keys(params).length === 0) {
@@ -46,6 +51,7 @@ export class MessageBoardComponent implements OnInit, OnDestroy {
     this.messages = this.chat.publicMessages;
     this.channelSubscription = this.chat.onMessage.subscribe(messages => {
       this.messages = messages;
+      setTimeout(() => this.$chatWindow.scrollTop = this.$chatWindow.scrollHeight, 100);
     });
   }
 
@@ -55,6 +61,7 @@ export class MessageBoardComponent implements OnInit, OnDestroy {
     this.channelSubscription = this.chat.onPrivateMsg.subscribe(msg => {
       if (msg.name === target) {
         this.messages = msg.messages;
+        setTimeout(() => this.$chatWindow.scrollTop = this.$chatWindow.scrollHeight, 100);
       }
     });
   }
@@ -64,6 +71,7 @@ export class MessageBoardComponent implements OnInit, OnDestroy {
     this.chat.joinRoom(room);
     this.channelSubscription = this.chat.onRoomChat.subscribe((msg: Message) => {
       this.messages.push(msg);
+      setTimeout(() => this.$chatWindow.scrollTop = this.$chatWindow.scrollHeight, 100);
     });
   }
 

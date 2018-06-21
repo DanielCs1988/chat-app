@@ -1,0 +1,24 @@
+<nav class="navbar navbar-expand-lg sticky-top navbar-light bg-light my-3 align-content-between">
+
+  <a routerLink="/chat" class="navbar-brand text-danger">MNG Chat</a>
+
+  <ul *ngIf="!isLoggedIn()" class="navbar-nav">
+    <li class="nav-item">
+      <a class="nav-link" (click)="login()">
+        Login
+      </a>
+    </li>
+  </ul>
+
+  <ul *ngIf="isLoggedIn()" class="navbar-nav px-3">
+    <span class="navbar-text">
+      How are you today, {{ name }}?
+    </span>
+    <li class="nav-item">
+      <a class="nav-link" (click)="logout()">
+        Logout
+      </a>
+    </li>
+  </ul>
+
+</nav>
