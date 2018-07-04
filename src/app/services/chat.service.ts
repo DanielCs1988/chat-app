@@ -10,13 +10,15 @@ export class ChatService {
   private domain = 'localhost';
   private port = 8080;
 
-  onMessage = new EventEmitter<Message[]>();
-  onPrivateMsg = new EventEmitter<{name: string, messages: Message[]}>();
-  onUserChange = new EventEmitter<string[]>();
-  onRoomChat = new EventEmitter<Message>();
-  publicMessages: Message[] = [];
-  privateMessages = new Map<string, Message[]>();
-  names: string[] = [];
+  // CHAT EMITTERS
+  onMessage = new EventEmitter<Message>();  // PUBLIC
+  onPrivateMsg = new EventEmitter<{id: number, messages: Message}>();  // PRIVATE
+  onRoomChat = new EventEmitter<{name: string, messages: Message}>();  // ROOM
+
+  // NEW USER LOGINS
+  onUserChange = new EventEmitter<{id: number, nickname: string}[]>();
+  private currentUsers: {id: number, nickname: string}[] = [];
+
   name: string;
 
   constructor(private socket: SocketClient, private router: Router, private authService: AuthService) {
@@ -38,13 +40,12 @@ export class ChatService {
   }
 
   private onChat(msg: Message) {
-    this.publicMessages.push(msg);
-    this.onMessage.emit(this.publicMessages.slice());
+    this.onMessage.emit(msg);
   }
 
-  private onNewName(names: string[]) {
-    this.names = names.filter(name => name !== this.name);
-    this.onUserChange.emit(this.names.slice());
+  private onNewName(names: {id: number, nickname: string}[]) {
+    this.currentUsers = names.filter(user => user.nickname !== this.name);
+    this.onUserChange.emit(this.currentUsers.slice());
   }
 
   sendPrivateMsg(target: string, msg: string) {
@@ -54,6 +55,7 @@ export class ChatService {
   }
 
   sendToRoom(msg: string) {
+    // TODO: refactor
     this.socket.send('room/chat', msg);
   }
 
