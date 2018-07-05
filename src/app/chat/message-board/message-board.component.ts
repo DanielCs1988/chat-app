@@ -5,6 +5,7 @@ import {ActivatedRoute, Params} from '@angular/router';
 import {ChatService} from '../../services/chat.service';
 import {Subscription} from 'rxjs';
 import {AuthService} from '../../services/auth.service';
+import {User} from '../../models/user.model';
 
 @Component({
   selector: 'app-message-board',
@@ -25,7 +26,7 @@ export class MessageBoardComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.name = this.authService.userProfile ? this.authService.userProfile.givenName : '';
-    this.authService.userJoined.subscribe(name => this.name = name);
+    this.authService.userJoined.subscribe((user: User) => this.name = user.nickName);
     this.$chatWindow = document.querySelector('.chat-window');
 
     this.route.params.subscribe((params: Params) => {

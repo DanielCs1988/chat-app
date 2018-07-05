@@ -13,7 +13,7 @@ import {HttpClient} from '@angular/common/http';
 export class AuthService {
 
   userProfile: User;
-  userJoined = new EventEmitter<User>(); // CHECK THIS
+  userJoined = new EventEmitter<User>(); // TODO: trigger when profile is ready
 
   private auth0 = new auth0.WebAuth({
     clientID: AUTH_CONFIG.clientID,
@@ -87,6 +87,7 @@ export class AuthService {
 
     } else {
       this.isProfileFetched = true;
+      this.userJoined.emit(this.userProfile);
       this.initSocketConnection(accessToken);
       this.router.navigate(['/chat']);
     }

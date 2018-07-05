@@ -4,6 +4,7 @@ import {Router} from '@angular/router';
 import {AuthService} from './auth.service';
 import {UserDTO} from '../models/userdto.model';
 import {Message} from '../chat/message.model';
+import {User} from '../models/user.model';
 
 @Injectable()
 export class ChatService {
@@ -22,7 +23,7 @@ export class ChatService {
 
   private usersInRooms = new Map<string, UserDTO[]>();
 
-  user: UserDTO;
+  user: User;
 
   constructor(private socket: SocketClient, private router: Router, private authService: AuthService) {
     this.initSocketConnection(socket);
