@@ -10,7 +10,15 @@ import {AuthService} from '../services/auth.service';
 export class UserDetailComponent implements OnInit {
 
   currentUser: User;
-  userName: string;
+  updatedUser: User;
+  id: number;
+  nickname: string;
+  givenName: string;
+  familyName: string;
+  intro: string;
+  pictureUrl: string;
+
+
 
   constructor(private authService: AuthService) {
 
@@ -24,6 +32,10 @@ export class UserDetailComponent implements OnInit {
 
   }
 
-  updateUser()
+  updateUser() {
+    this.id = this.authService.userProfile.id;
+    this.updatedUser = new User(this.id, this.givenName, this.familyName, this.pictureUrl, this.nickname, this.intro);
+    this.authService.updateProfile(this.updatedUser);
+  }
 
 }

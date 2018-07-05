@@ -9,27 +9,27 @@
   <form>
     <div class="form-group">
       <label for="nickname">Nickname</label>
-      <input type="text" class="form-control" id="nickname" required>
+      <input type="text" class="form-control" id="nickname" required [(ngModel)]="nickname">
     </div>
 
     <div class="form-group">
       <label for="given-name">Given name</label>
-      <input type="text" class="form-control" id="given-name" [(ngModel)]="">
+      <input type="text" class="form-control" id="given-name" [(ngModel)]="givenName">
     </div>
 
     <div class="form-group">
       <label for="family-name">Family name</label>
-      <input type="text" class="form-control" id="family-name">
+      <input type="text" class="form-control" id="family-name" [(ngModel)]="familyName">
     </div>
 
     <div class="form-group">
-      <label for="intro">Family name</label>
-      <input type="text" class="form-control" id="intro">
+      <label for="intro">Introduction</label>
+      <input type="text" class="form-control" id="intro" [(ngModel)]="introe">
     </div>
 
     <div class="form-group">
       <label for="picture-url">Picture</label>
-      <input type="text" class="form-control" id="picture-url" required>
+      <input type="text" class="form-control" id="picture-url" required [(ngModel)]="pictureUrl">
     </div>
 
     <button type="submit" onclick="updateUser" class="btn btn-success" (submit)="false">Submit</button>
