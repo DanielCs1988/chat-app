@@ -16,6 +16,8 @@ import { WelcomeScreenComponent } from './welcome-screen/welcome-screen.componen
 import {ChatHistoryService} from './services/chat-history.service';
 import {HttpClientModule} from '@angular/common/http';
 import { UserDetailComponent } from './user-detail/user-detail.component';
+import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
+import {AuthInterceptorService} from './services/auth.interceptor';
 
 @NgModule({
   declarations: [
@@ -38,7 +40,8 @@ import { UserDetailComponent } from './user-detail/user-detail.component';
     ChatService,
     ChatHistoryService,
     AuthGuard,
-    AuthService
+    AuthService,
+    {provide: HTTP_INTERCEPTORS, useClass: AuthInterceptorService, multi: true}
   ],
   bootstrap: [AppComponent]
 })
