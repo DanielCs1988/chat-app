@@ -63,7 +63,7 @@ export class ChatService {
     this.socket.send('room/chat', msg);
   }
 
-  joinRoom(room: string) {
+    joinRoom(room: string) {
     this.socket.send('join', room);
   }
 
