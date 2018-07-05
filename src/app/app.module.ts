@@ -15,6 +15,7 @@ import {AppRoutingModule} from './app-routing.module';
 import { WelcomeScreenComponent } from './welcome-screen/welcome-screen.component';
 import {ChatHistoryService} from './services/chat-history.service';
 import {HttpClientModule} from '@angular/common/http';
+import { UserDetailComponent } from './user-detail/user-detail.component';
 
 @NgModule({
   declarations: [
@@ -23,7 +24,8 @@ import {HttpClientModule} from '@angular/common/http';
     NavigationComponent,
     MessageBoardComponent,
     NavbarComponent,
-    WelcomeScreenComponent
+    WelcomeScreenComponent,
+    UserDetailComponent
   ],
   imports: [
     BrowserModule,
