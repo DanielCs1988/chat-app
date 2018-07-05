@@ -1,9 +1,9 @@
 import {EventEmitter, Injectable} from '@angular/core';
 import {SocketClient} from './SocketClient';
 import {Router} from '@angular/router';
-import {Message} from '../models/message.model';
 import {AuthService} from './auth.service';
 import {UserDTO} from '../models/userdto.model';
+import {Message} from '../chat/message.model';
 
 @Injectable()
 export class ChatService {
@@ -13,7 +13,7 @@ export class ChatService {
 
   // CHAT EMITTERS
   onMessage = new EventEmitter<Message>();  // PUBLIC
-  onPrivateMsg = new EventEmitter<{nickname: string, message: Message}>();  // PRIVATE
+  onPrivateMsg = new EventEmitter<{id: number, message: Message}>();  // PRIVATE
   onRoomChat = new EventEmitter<{target: string, payload: Message}>();  // ROOM
 
   // NEW USER LOGINS
@@ -52,13 +52,13 @@ export class ChatService {
     this.onUserChange.emit(this.currentUsers.slice());
   }
 
-  sendPrivateMsg(target: string, msg: string) {
+  sendPrivateMsg(target: number, msg: string) {
     const message = {
-      name: target,
+      name: target.toString(),
       content: msg
     };
     this.socket.send('private/send', message, (id: number) => {
-      this.onPrivateMsg.emit({nickname: target, message: {...message, id}});
+      this.onPrivateMsg.emit({id: target, message: {...message, id}});
     });
   }
 
@@ -75,7 +75,7 @@ export class ChatService {
   }
 
   private receivePrivateMsg(message: Message) {
-    this.onPrivateMsg.emit({nickname: message.name, message});
+    this.onPrivateMsg.emit({id: Number(message.name), message});
   }
 
   private onNewUserInRoom(resp: {target: string, payload: any}) {
