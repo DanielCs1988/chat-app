@@ -97,9 +97,9 @@ export class AuthService {
     }
   }
 
-  public async updateProfile(nickname: string, introduction: string): void {
+  public async updateProfile(userInfo: User): void {
     const accessToken = localStorage.getItem('access_token');
-    const user = await this.http.put<User>(`/update`, {nickname:nickname,introduction:introduction});
+    const user = await this.http.put<User>(`/update`, userInfo);
     this.userProfile.nickName = user.nickName;
     this.userProfile.introduction = user.introduction;
     this.userLoginAccepted(accessToken);
