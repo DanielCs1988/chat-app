@@ -14,6 +14,8 @@ import {NavbarComponent} from './navbar/navbar.component';
 import {AppRoutingModule} from './app-routing.module';
 import { WelcomeScreenComponent } from './welcome-screen/welcome-screen.component';
 import {ChatHistoryService} from './services/chat-history.service';
+import {HttpClientModule} from '@angular/common/http';
+import { UserDetailComponent } from './user-detail/user-detail.component';
 import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
 import {AuthInterceptorService} from './services/auth.interceptor';
 
@@ -24,7 +26,8 @@ import {AuthInterceptorService} from './services/auth.interceptor';
     NavigationComponent,
     MessageBoardComponent,
     NavbarComponent,
-    WelcomeScreenComponent
+    WelcomeScreenComponent,
+    UserDetailComponent
   ],
   imports: [
     BrowserModule,
