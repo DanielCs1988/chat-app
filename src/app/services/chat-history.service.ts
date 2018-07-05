@@ -15,14 +15,14 @@ export class ChatHistoryService {
     this.subscribeToNewMessages();
   }
 
-  private fetchMessagesHistory() {
+  public fetchMessagesHistory() {
     this.http.get<Message[]>('/get-message').subscribe(messages => {
         this.publicMessages = messages;
       }
     );
   }
 
-  async fetchPrivateMessageHistory(userId: number): Promise<Message[]> {
+  public async fetchPrivateMessageHistory(userId: number): Promise<Message[]> {
     if (this.privateMessages.has(userId)) {
       return this.privateMessages.get(userId);
     }
@@ -31,7 +31,7 @@ export class ChatHistoryService {
     return messages;
   }
 
-  private async fetchRoomMessages(room: string): Promise<Message[]> {
+  public async fetchRoomMessages(room: string): Promise<Message[]> {
     // If we want to fetch room messages only when joining a room
     // We both have to save the messages to the cache and return a Promise for the caller (chat) component
     if (this.roomMessages.has(room)) {
@@ -44,6 +44,11 @@ export class ChatHistoryService {
 
     private subscribeToNewMessages() {
     // Here we should subscribe to real-time updates from the chat service emitters
+      this.chatService.onMessage.subscribe(message => {
+        this.publicMessages.push(message);
+      });
+      this.chatService.onRoomChat.subscribe((room, message) =>
+        this.roomMessages.set(room, message));
   }
 
 }
