@@ -74,6 +74,13 @@ export class AuthService {
     localStorage.setItem("expires_at", expiresAt);
   }
 
+  private userLoginAccepted(accessToken) {
+    this.isProfileFetched = true;
+    this.userJoined.emit(this.userProfile);
+    this.initSocketConnection(accessToken);
+    this.router.navigate(['/chat']);
+  }
+
   private async getProfile(): void {
     const accessToken = localStorage.getItem('access_token');
     if (!accessToken) {
@@ -86,11 +93,17 @@ export class AuthService {
       // TODO: NAVIGATE TO NEW COMPONENT; NEED TO PROVIDE AN UPDATER METHOD HERE
 
     } else {
-      this.isProfileFetched = true;
-      this.userJoined.emit(this.userProfile);
-      this.initSocketConnection(accessToken);
-      this.router.navigate(['/chat']);
+      this.userLoginAccepted(accessToken);
     }
+  }
+
+  public async updateProfile(nickname: string, introduction: string): void {
+    const accessToken = localStorage.getItem('access_token');
+    const user = await this.http.put<User>(`/update`, {nickname:nickname,introduction:introduction});
+    this.userProfile.nickName = user.nickName;
+    this.userProfile.introduction = user.introduction;
+    this.userLoginAccepted(accessToken);
+
   }
 
   isAuthenticated(): boolean {
