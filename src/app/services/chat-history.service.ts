@@ -1,6 +1,7 @@
 import {EventEmitter, Injectable} from '@angular/core';
 import {Message} from '../chat/message.model';
 import {HttpClient} from '@angular/common/http';
+import {ChatService} from './chat.service';
 
 @Injectable()
 export class ChatHistoryService {
@@ -9,29 +10,25 @@ export class ChatHistoryService {
   privateMessages = new Map<number, Message[]>();
   roomMessages = new Map<string, Message[]>();
 
-  publicMessagesFetched = new EventEmitter<Message[]>();
-  privateMessagesFetched = new EventEmitter<Map<number, Message[]>>();
-
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private chatService: ChatService) {
     this.fetchMessagesHistory();
     this.subscribeToNewMessages();
   }
 
   private fetchMessagesHistory() {
-    // Call the API to populate public and private, possibly room messages too
     this.http.get<Message[]>('/messages').subscribe(messages => {
         this.publicMessages = messages;
-        this.publicMessagesFetched.emit(messages);
       }
     );
   }
 
-  private fetchPrivateMessageHistory(userId: number) {
-    this.http.get<Message[]>(`/messages/target/${userId}`).subscribe(messages => {
-        this.privateMessages.set(userId, messages);
-        this.privateMessagesFetched.emit(this.privateMessages);
-      }
-    );
+  async fetchPrivateMessageHistory(userId: number): Promise<Message[]> {
+    if (this.privateMessages.has(userId)) {
+      return this.privateMessages.get(userId);
+    }
+    const messages = await this.http.get<Message[]>(`/messages/target/${userId}`).toPromise();
+    this.privateMessages.set(userId, messages);
+    return messages;
   }
 
   private subscribeToNewMessages() {
