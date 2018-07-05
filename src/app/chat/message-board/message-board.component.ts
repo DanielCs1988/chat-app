@@ -40,7 +40,7 @@ export class MessageBoardComponent implements OnInit, OnDestroy {
         this.onPublicChat();
       }
       if (params && params['name']) {
-        this.onPrivateChat(params['name']);
+        this.onPrivateChat(Number(params['name']));
       }
       if (params && params['room']) {
         this.onRoomChat(params['room']);
@@ -49,16 +49,18 @@ export class MessageBoardComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.channelSubscription.unsubscribe();
+    if (this.channelSubscription) {
+      this.channelSubscription.unsubscribe();
+    }
   }
 
 
-  private onPublicChat() {
-    this.messages = this.history.publicMessages;
-    this.channelSubscription = this.chat.onMessage.subscribe(message => {
-      this.messages.push(message);
-      setTimeout(() => this.$chatWindow.scrollTop = this.$chatWindow.scrollHeight, 100);
-    });
+  private async onPublicChat() {
+    this.messages = await this.history.fetchMessagesHistory();
+    // this.channelSubscription = this.chat.onMessage.subscribe(message => {
+    //   // this.messages.push(message);
+    //   setTimeout(() => this.$chatWindow.scrollTop = this.$chatWindow.scrollHeight, 100);
+    // });
   }
 
   private async onPrivateChat(target: number) {
@@ -73,9 +75,10 @@ export class MessageBoardComponent implements OnInit, OnDestroy {
     });
   }
 
-  private onRoomChat(room: string) {
+  private async onRoomChat(room: string) {
     this.room = room;
     this.chat.joinRoom(room);
+    this.messages = await this.history.fetchRoomMessages(room);
     this.channelSubscription = this.chat.onRoomChat.subscribe(msg => {
       if (msg.target === room) {
         this.messages.push(msg.payload);

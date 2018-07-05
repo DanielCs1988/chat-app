@@ -13,7 +13,7 @@ import {HttpClient} from '@angular/common/http';
 export class AuthService {
 
   userProfile: User;
-  userJoined = new EventEmitter<User>(); // TODO: trigger when profile is ready
+  userJoined = new EventEmitter<User>();
 
   private auth0 = new auth0.WebAuth({
     clientID: AUTH_CONFIG.clientID,
@@ -25,15 +25,11 @@ export class AuthService {
   });
 
   private isProfileFetched = false;
-  private LOGIN_URL = 'http://localhost:8080/users/login';
+  private USERS_URL = '/api/users/';
   private API_DOMAIN = 'localhost';
-  private PORT = 8080;
+  private PORT = 8000;
 
-  constructor(private router: Router, private socket: SocketClient, private http: HttpClient) {
-    if (this.isAuthenticated()) {
-      this.getProfile();
-    }
-  }
+  constructor(private router: Router, private socket: SocketClient, private http: HttpClient) { }
 
   login(): void {
     this.auth0.authorize();
@@ -42,7 +38,6 @@ export class AuthService {
   handleAuthentication(): void {
     if (this.isAuthenticated()) {
       this.getProfile();
-      return;
     }
     this.auth0.parseHash((err, authResult) => {
       if (authResult && authResult.accessToken && authResult.idToken) {
@@ -56,7 +51,6 @@ export class AuthService {
   }
 
   private initSocketConnection(accessToken: string) {
-    this.socket.on('open', this.getProfile.bind(this));
     this.socket.connect(this.API_DOMAIN, this.PORT, accessToken);
   }
 
@@ -67,43 +61,41 @@ export class AuthService {
     this.router.navigate(['/']);
   }
 
-  private setSession(authResult: Auth0DecodedHash): void {
+  private setSession(authResult: Auth0DecodedHash) {
     const expiresAt = JSON.stringify(new Date().getTime() + authResult.expiresIn * 1000);
     localStorage.setItem("access_token", authResult.accessToken);
     localStorage.setItem("id_token", authResult.idToken);
     localStorage.setItem("expires_at", expiresAt);
   }
 
-  private userLoginAccepted(accessToken) {
+  private userLoginAccepted(accessToken: string) {
+    console.log('login accepted');
     this.isProfileFetched = true;
     this.userJoined.emit(this.userProfile);
     this.initSocketConnection(accessToken);
     this.router.navigate(['/chat']);
   }
 
-  private async getProfile(): void {
+  private async getProfile() {
     const accessToken = localStorage.getItem('access_token');
     if (!accessToken) {
       throw new Error('Access Token must exist to fetch profile');
     }
-    const profile = await this.http.post<User>(this.LOGIN_URL, {}).toPromise();
+    const profile = await this.http.post<User>(this.USERS_URL + 'login', {}).toPromise();
     this.userProfile = profile;
     if (!(profile.nickName && profile.introduction)) {
-
-      // TODO: NAVIGATE TO NEW COMPONENT; NEED TO PROVIDE AN UPDATER METHOD HERE
-
+      this.router.navigate(['/user-details']);
     } else {
       this.userLoginAccepted(accessToken);
     }
   }
 
-  public async updateProfile(userInfo: User): void {
+  public async updateProfile(nick: string, intro: string) {
     const accessToken = localStorage.getItem('access_token');
-    const user = await this.http.put<User>(`/update`, userInfo);
-    this.userProfile.nickName = user.nickName;
-    this.userProfile.introduction = user.introduction;
+    this.userProfile.nickName = nick;
+    this.userProfile.introduction = intro;
+    await this.http.post(this.USERS_URL + 'update', this.userProfile).toPromise();
     this.userLoginAccepted(accessToken);
-
   }
 
   isAuthenticated(): boolean {

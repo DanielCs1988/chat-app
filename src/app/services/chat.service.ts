@@ -27,11 +27,11 @@ export class ChatService {
 
   constructor(private socket: SocketClient, private router: Router, private authService: AuthService) {
     this.initSocketConnection(socket);
+    this.user = this.authService.userProfile;
     this.authService.userJoined.subscribe(user => this.user = user);
   }
 
   private initSocketConnection(socket: SocketClient) {
-    socket.connect(this.domain, this.port);
     socket.on('users', (names: UserDTO[]) => this.onNewName(names));
     socket.on('join', (resp: {target: string, payload: any}) => this.onNewUserInRoom(resp));
     socket.on('chat', (msg: Message) => this.onChat(msg));
@@ -49,7 +49,7 @@ export class ChatService {
   }
 
   private onNewName(names: UserDTO[]) {
-    this.currentUsers = names.filter(user => user.id !== this.user.id);
+    this.currentUsers = names;
     this.onUserChange.emit(this.currentUsers.slice());
   }
 
@@ -59,7 +59,10 @@ export class ChatService {
       content: msg
     };
     this.socket.send('private/send', message, (id: number) => {
-      this.onPrivateMsg.emit({id: target, message: {...message, id}});
+      this.onPrivateMsg.emit({
+        id: target, message: new Message(
+          id, this.user.nickName, msg)
+      });
     });
   }
 
@@ -76,7 +79,9 @@ export class ChatService {
   }
 
   private receivePrivateMsg(message: Message) {
-    this.onPrivateMsg.emit({id: Number(message.name), message});
+    this.onPrivateMsg.emit({id: Number(message.name), message: new Message(
+      message.id, this.currentUsers.find(user => user.id === Number(message.name)).nickname, message.content
+      )});
   }
 
   private onNewUserInRoom(resp: {target: string, payload: any}) {

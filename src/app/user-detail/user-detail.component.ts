@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import {User} from '../models/user.model';
+import {Component, OnInit, ViewChild} from '@angular/core';
+import {NgForm} from '@angular/forms';
 import {AuthService} from '../services/auth.service';
 
 @Component({
@@ -7,35 +7,21 @@ import {AuthService} from '../services/auth.service';
   templateUrl: './user-detail.component.html',
   styleUrls: ['./user-detail.component.css']
 })
-export class UserDetailComponent implements OnInit {
-
-  currentUser: User;
-  updatedUser: User;
-  id: number;
-  nickname: string;
-  givenName: string;
-  familyName: string;
-  intro: string;
-  pictureUrl: string;
+export class UserDetailComponent {
 
 
+  @ViewChild("userForm") userForm: NgForm;
 
-  constructor(private authService: AuthService) {
-
-    this.currentUser = authService.userProfile;
-
-  }
-
-  ngOnInit() {
-
-
-
+  constructor(private auth: AuthService) {
   }
 
   updateUser() {
-    this.id = this.authService.userProfile.id;
-    this.updatedUser = new User(this.id, this.givenName, this.familyName, this.pictureUrl, this.nickname, this.intro);
-    this.authService.updateProfile(this.updatedUser);
+    if (!this.userForm.valid) {
+      return;
+    }
+    const nickname = this.userForm.value.nickname;
+    const introduction = this.userForm.value.introduction;
+    this.auth.updateProfile(nickname, introduction);
   }
 
 }

@@ -1,37 +1,22 @@
-<div class="container">
+<form (ngSubmit)="updateUser()" #userForm="ngForm" class="pane center-block">
 
-  <img [src]="currentUser.pictureUrl">
-  <p>Nickname: {{currentUser.nickName}}</p>
-  <p>Nickname: {{currentUser.givenName}}</p>
-  <p>Nickname: {{currentUser.familyName}}</p>
-  <p>Nickname: {{currentUser.introduction}}</p>
+  <div class="form-group">
+    <label for="nickname">Nickname</label>
+    <input type="text" class="form-control" id="nickname" name="nickname" ngModel required minlength="5">
+  </div>
 
-  <form>
-    <div class="form-group">
-      <label for="nickname">Nickname</label>
-      <input type="text" class="form-control" id="nickname" required [(ngModel)]="nickname">
-    </div>
+  <div class="form-group">
+    <label for="intro">Introduction</label>
+    <textarea
+      class="form-control"
+      id="intro"
+      name="introduction"
+      rows="5"
+      ngModel required minlength="5"
+    ></textarea>
+  </div>
 
-    <div class="form-group">
-      <label for="given-name">Given name</label>
-      <input type="text" class="form-control" id="given-name" [(ngModel)]="givenName">
-    </div>
-
-    <div class="form-group">
-      <label for="family-name">Family name</label>
-      <input type="text" class="form-control" id="family-name" [(ngModel)]="familyName">
-    </div>
-
-    <div class="form-group">
-      <label for="intro">Introduction</label>
-      <input type="text" class="form-control" id="intro" [(ngModel)]="introe">
-    </div>
-
-    <div class="form-group">
-      <label for="picture-url">Picture</label>
-      <input type="text" class="form-control" id="picture-url" required [(ngModel)]="pictureUrl">
-    </div>
-
-    <button type="submit" onclick="updateUser" class="btn btn-success" (submit)="false">Submit</button>
-  </form>
-</div>
+  <button type="submit" class="btn btn-success btn-block mt-3" [disabled]="!userForm.valid">
+    Start chatting
+  </button>
+</form>
