@@ -14,11 +14,13 @@ export class ChatService {
   // CHAT EMITTERS
   onMessage = new EventEmitter<Message>();  // PUBLIC
   onPrivateMsg = new EventEmitter<{nickname: string, message: Message}>();  // PRIVATE
-  onRoomChat = new EventEmitter<{room: string, message: Message}>();  // ROOM
+  onRoomChat = new EventEmitter<{target: string, payload: Message}>();  // ROOM
 
   // NEW USER LOGINS
   onUserChange = new EventEmitter<UserDTO[]>();
   private currentUsers: UserDTO[] = [];
+
+  private usersInRooms = new Map<string, UserDTO[]>();
 
   user: UserDTO;
 
@@ -30,9 +32,10 @@ export class ChatService {
   private initSocketConnection(socket: SocketClient) {
     socket.connect(this.domain, this.port);
     socket.on('users', (names: UserDTO[]) => this.onNewName(names));
+    socket.on('join', (resp: {target: string, payload: any}) => this.onNewUserInRoom(resp));
     socket.on('chat', (msg: Message) => this.onChat(msg));
     socket.on('private/get', (msg: Message) => this.receivePrivateMsg(msg));
-    socket.on('room/chat', (data: {room: string, message: Message}) => this.onRoomChat.emit(data));
+    socket.on('room/chat', (data: {target: string, payload: Message}) => this.onRoomChat.emit(data));
     socket.on('close', () => console.warn('Lost connection!'));
   }
 
@@ -59,15 +62,23 @@ export class ChatService {
     });
   }
 
-  sendToRoom(msg: string) {
-    this.socket.send('room/chat', msg);
+  sendToRoom(roomName: string, msg: string) {
+    const message = {
+      name: roomName,
+      content: msg
+    };
+    this.socket.send('room/chat', message);
   }
 
-    joinRoom(room: string) {
-    this.socket.send('join', room);
+  joinRoom(room: string) {
+      this.socket.send('join', room);
   }
 
   private receivePrivateMsg(message: Message) {
     this.onPrivateMsg.emit({nickname: message.name, message});
+  }
+
+  private onNewUserInRoom(resp: {target: string, payload: any}) {
+    this.usersInRooms.set(resp.target, resp.payload);
   }
 }
