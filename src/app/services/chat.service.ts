@@ -19,7 +19,7 @@ export class ChatService {
 
   // NEW USER LOGINS
   onUserChange = new EventEmitter<UserDTO[]>();
-  private currentUsers: UserDTO[] = [];
+  currentUsers: UserDTO[] = [];
 
   private usersInRooms = new Map<string, UserDTO[]>();
 

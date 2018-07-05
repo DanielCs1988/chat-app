@@ -2,11 +2,11 @@
   <div class="col-md-6">
 
     <div class="pane">
-      <h5 class="text-center" *ngIf="names.length === 0">No users are currently logged in.</h5>
+      <h5 class="text-center" *ngIf="users.length === 0">No users are currently logged in.</h5>
       <ul class="nav nav-pills flex-column">
-        <li class="nav-item" *ngFor="let name of names">
-          <a class="nav-link" [routerLink]="name" routerLinkActive="active">
-            {{ name }}
+        <li class="nav-item" *ngFor="let user of users">
+          <a class="nav-link" [routerLink]="user.id" routerLinkActive="active">
+            {{ user.nickname }}
           </a>
         </li>
       </ul>
