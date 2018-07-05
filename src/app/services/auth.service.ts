@@ -80,13 +80,13 @@ export class AuthService {
       throw new Error('Access Token must exist to fetch profile');
     }
     const profile = await this.http.post<User>(this.LOGIN_URL, {}).toPromise();
+    this.userProfile = profile;
     if (!(profile.nickName && profile.introduction)) {
 
       // TODO: NAVIGATE TO NEW COMPONENT; NEED TO PROVIDE AN UPDATER METHOD HERE
 
     } else {
       this.isProfileFetched = true;
-      this.userProfile = profile;
       this.initSocketConnection(accessToken);
       this.router.navigate(['/chat']);
     }
