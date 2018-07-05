@@ -13,6 +13,7 @@ import {AuthService} from './services/auth.service';
 import {NavbarComponent} from './navbar/navbar.component';
 import {AppRoutingModule} from './app-routing.module';
 import { WelcomeScreenComponent } from './welcome-screen/welcome-screen.component';
+import {ChatHistoryService} from './services/chat-history.service';
 
 @NgModule({
   declarations: [
@@ -31,6 +32,7 @@ import { WelcomeScreenComponent } from './welcome-screen/welcome-screen.componen
   providers: [
     SocketClient,
     ChatService,
+    ChatHistoryService,
     AuthGuard,
     AuthService
   ],
