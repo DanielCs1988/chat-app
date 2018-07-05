@@ -1,7 +1,7 @@
 import {EventEmitter, Injectable} from '@angular/core';
 import {SocketClient} from './SocketClient';
 import {Router} from '@angular/router';
-import {Message} from '../chat/message.model';
+import {Message} from '../models/message.model';
 import {AuthService} from './auth.service';
 import {UserDTO} from '../models/userdto.model';
 
@@ -13,27 +13,27 @@ export class ChatService {
 
   // CHAT EMITTERS
   onMessage = new EventEmitter<Message>();  // PUBLIC
-  onPrivateMsg = new EventEmitter<{id: number, message: Message}>();  // PRIVATE
+  onPrivateMsg = new EventEmitter<{nickname: string, message: Message}>();  // PRIVATE
   onRoomChat = new EventEmitter<{room: string, message: Message}>();  // ROOM
 
   // NEW USER LOGINS
   onUserChange = new EventEmitter<UserDTO[]>();
   private currentUsers: UserDTO[] = [];
 
-  name: string;
+  user: UserDTO;
 
   constructor(private socket: SocketClient, private router: Router, private authService: AuthService) {
     this.initSocketConnection(socket);
-    this.authService.userJoined.subscribe(name => this.name = name);
+    this.authService.userJoined.subscribe(user => this.user = user);
   }
 
   private initSocketConnection(socket: SocketClient) {
     socket.connect(this.domain, this.port);
-    socket.on('close', () => console.warn('Lost connection!'));
-    socket.on('chat', (msg: Message) => this.onChat(msg));
     socket.on('users', (names: UserDTO[]) => this.onNewName(names));
-    socket.on('private', (msg: Message) => this.receivePrivateMsg(msg));
+    socket.on('chat', (msg: Message) => this.onChat(msg));
+    socket.on('private/get', (msg: Message) => this.receivePrivateMsg(msg));
     socket.on('room/chat', (data: {room: string, message: Message}) => this.onRoomChat.emit(data));
+    socket.on('close', () => console.warn('Lost connection!'));
   }
 
   sendMessage(msg: string) {
@@ -45,18 +45,21 @@ export class ChatService {
   }
 
   private onNewName(names: UserDTO[]) {
-    this.currentUsers = names.filter(user => user.nickname !== this.name);
+    this.currentUsers = names.filter(user => user.id !== this.user.id);
     this.onUserChange.emit(this.currentUsers.slice());
   }
 
   sendPrivateMsg(target: string, msg: string) {
-    // const message = new Message(this.name, msg);
-    // this.updatePrivateMessages(target, message);
-    // this.socket.send('private', new Message(target, msg));
+    const message = {
+      name: target,
+      content: msg
+    };
+    this.socket.send('private/send', message, (id: number) => {
+      this.onPrivateMsg.emit({nickname: target, message: {...message, id}});
+    });
   }
 
   sendToRoom(msg: string) {
-    // TODO: refactor
     this.socket.send('room/chat', msg);
   }
 
@@ -65,6 +68,6 @@ export class ChatService {
   }
 
   private receivePrivateMsg(message: Message) {
-    this.onPrivateMsg.emit({id: message.id, message});
+    this.onPrivateMsg.emit({nickname: message.name, message});
   }
 }
