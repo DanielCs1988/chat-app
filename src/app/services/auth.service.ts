@@ -81,7 +81,9 @@ export class AuthService {
     }
     const profile = await this.http.post<User>(this.LOGIN_URL, {}).toPromise();
     if (!(profile.nickName && profile.introduction)) {
-      // NAVIGATE TO NEW COMPONENT; NEED TO PROVIDE AN UPDATER METHOD HERE
+
+      // TODO: NAVIGATE TO NEW COMPONENT; NEED TO PROVIDE AN UPDATER METHOD HERE
+
     } else {
       this.isProfileFetched = true;
       this.userProfile = profile;
@@ -102,9 +104,4 @@ export class AuthService {
   static getToken() {
     return localStorage.getItem('access_token');
   }
-}
-
-interface ExtraInfo {
-  nickName: string;
-  introduction: string;
 }

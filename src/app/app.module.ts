@@ -14,7 +14,8 @@ import {NavbarComponent} from './navbar/navbar.component';
 import {AppRoutingModule} from './app-routing.module';
 import { WelcomeScreenComponent } from './welcome-screen/welcome-screen.component';
 import {ChatHistoryService} from './services/chat-history.service';
-import {HttpClientModule} from '@angular/common/http';
+import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
+import {AuthInterceptorService} from './services/auth.interceptor';
 
 @NgModule({
   declarations: [
@@ -36,7 +37,8 @@ import {HttpClientModule} from '@angular/common/http';
     ChatService,
     ChatHistoryService,
     AuthGuard,
-    AuthService
+    AuthService,
+    {provide: HTTP_INTERCEPTORS, useClass: AuthInterceptorService, multi: true}
   ],
   bootstrap: [AppComponent]
 })
