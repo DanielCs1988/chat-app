@@ -16,7 +16,7 @@ export class ChatHistoryService {
   }
 
   private fetchMessagesHistory() {
-    this.http.get<Message[]>('/messages').subscribe(messages => {
+    this.http.get<Message[]>('/get-message').subscribe(messages => {
         this.publicMessages = messages;
       }
     );
@@ -26,7 +26,7 @@ export class ChatHistoryService {
     if (this.privateMessages.has(userId)) {
       return this.privateMessages.get(userId);
     }
-    const messages = await this.http.get<Message[]>(`/messages/target/${userId}`).toPromise();
+    const messages = await this.http.get<Message[]>(`/get-message?target=${userId}&type=USER`).toPromise();
     this.privateMessages.set(userId, messages);
     return messages;
   }
@@ -37,7 +37,7 @@ export class ChatHistoryService {
     if (this.roomMessages.has(room)) {
       return this.roomMessages.get(room);
     }
-    const messages = await this.http.get<Message[]>(`/messages/target/${room}`).toPromise();
+    const messages = await this.http.get<Message[]>(`/get-message?target=${room}&type=ROOM`).toPromise();
     this.roomMessages.set(room, messages);
     return messages;
   }
