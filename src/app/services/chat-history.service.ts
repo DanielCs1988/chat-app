@@ -31,12 +31,19 @@ export class ChatHistoryService {
     return messages;
   }
 
-  private subscribeToNewMessages() {
-    // Here we should subscribe to real-time updates from the chat service emitters
-  }
-
   private async fetchRoomMessages(room: string): Promise<Message[]> {
     // If we want to fetch room messages only when joining a room
     // We both have to save the messages to the cache and return a Promise for the caller (chat) component
+    if (this.roomMessages.has(room)) {
+      return this.roomMessages.get(room);
+    }
+    const messages = await this.http.get<Message[]>(`/messages/target/${room}`).toPromise();
+    this.roomMessages.set(room, messages);
+    return messages;
   }
+
+    private subscribeToNewMessages() {
+    // Here we should subscribe to real-time updates from the chat service emitters
+  }
+
 }
