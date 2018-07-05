@@ -1,17 +1,16 @@
 import {EventEmitter, Injectable} from '@angular/core';
 import {Message} from '../chat/message.model';
-import {UserDTO} from '../models/userdto.model';
 import {HttpClient} from '@angular/common/http';
 
 @Injectable()
 export class ChatHistoryService {
 
   publicMessages: Message[] = [];
-  privateMessages = new Map<UserDTO, Message[]>();
+  privateMessages = new Map<number, Message[]>();
   roomMessages = new Map<string, Message[]>();
 
   publicMessagesFetched = new EventEmitter<Message[]>();
-  privateMessagesFetched = new EventEmitter<Map<UserDTO, Message[]>>();
+  privateMessagesFetched = new EventEmitter<Map<number, Message[]>>();
 
   constructor(private http: HttpClient) {
     this.fetchMessagesHistory();
@@ -28,9 +27,9 @@ export class ChatHistoryService {
   }
 
   private fetchPrivateMessageHistory(userId: number) {
-    this.http.get<Map<UserDTO, Message[]>>('/messages/target/:userId').subscribe(messages => {
-        this.privateMessages = messages;
-        this.privateMessagesFetched.emit(messages);
+    this.http.get<Message[]>(`/messages/target/${userId}`).subscribe(messages => {
+        this.privateMessages.set(userId, messages);
+        this.privateMessagesFetched.emit(this.privateMessages);
       }
     );
   }
