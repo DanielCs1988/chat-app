@@ -13,6 +13,11 @@ import {AuthService} from './services/auth.service';
 import {NavbarComponent} from './navbar/navbar.component';
 import {AppRoutingModule} from './app-routing.module';
 import { WelcomeScreenComponent } from './welcome-screen/welcome-screen.component';
+import {ChatHistoryService} from './services/chat-history.service';
+import {HttpClientModule} from '@angular/common/http';
+import { UserDetailComponent } from './user-detail/user-detail.component';
+import {HTTP_INTERCEPTORS} from '@angular/common/http';
+import {AuthInterceptorService} from './services/auth.interceptor';
 
 @NgModule({
   declarations: [
@@ -21,18 +26,22 @@ import { WelcomeScreenComponent } from './welcome-screen/welcome-screen.componen
     NavigationComponent,
     MessageBoardComponent,
     NavbarComponent,
-    WelcomeScreenComponent
+    WelcomeScreenComponent,
+    UserDetailComponent
   ],
   imports: [
     BrowserModule,
     FormsModule,
-    AppRoutingModule
+    AppRoutingModule,
+    HttpClientModule
   ],
   providers: [
     SocketClient,
     ChatService,
+    ChatHistoryService,
     AuthGuard,
-    AuthService
+    AuthService,
+    {provide: HTTP_INTERCEPTORS, useClass: AuthInterceptorService, multi: true}
   ],
   bootstrap: [AppComponent]
 })

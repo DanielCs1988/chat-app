@@ -1,8 +1,10 @@
 import {EventEmitter, Injectable} from '@angular/core';
 import {SocketClient} from './SocketClient';
 import {Router} from '@angular/router';
-import {Message} from '../chat/message.model';
 import {AuthService} from './auth.service';
+import {UserDTO} from '../models/userdto.model';
+import {Message} from '../chat/message.model';
+import {User} from '../models/user.model';
 
 @Injectable()
 export class ChatService {
@@ -10,27 +12,32 @@ export class ChatService {
   private domain = 'localhost';
   private port = 8080;
 
-  onMessage = new EventEmitter<Message[]>();
-  onPrivateMsg = new EventEmitter<{name: string, messages: Message[]}>();
-  onUserChange = new EventEmitter<string[]>();
-  onRoomChat = new EventEmitter<Message>();
-  publicMessages: Message[] = [];
-  privateMessages = new Map<string, Message[]>();
-  names: string[] = [];
-  name: string;
+  // CHAT EMITTERS
+  onMessage = new EventEmitter<Message>();  // PUBLIC
+  onPrivateMsg = new EventEmitter<{id: number, message: Message}>();  // PRIVATE
+  onRoomChat = new EventEmitter<{target: string, payload: Message}>();  // ROOM
+
+  // NEW USER LOGINS
+  onUserChange = new EventEmitter<UserDTO[]>();
+  currentUsers: UserDTO[] = [];
+
+  private usersInRooms = new Map<string, UserDTO[]>();
+
+  user: User;
 
   constructor(private socket: SocketClient, private router: Router, private authService: AuthService) {
     this.initSocketConnection(socket);
-    this.authService.userJoined.subscribe(name => this.name = name);
+    this.user = this.authService.userProfile;
+    this.authService.userJoined.subscribe(user => this.user = user);
   }
 
   private initSocketConnection(socket: SocketClient) {
-    socket.connect(this.domain, this.port);
-    socket.on('close', () => console.warn('Lost connection!'));
+    socket.on('users', (names: UserDTO[]) => this.onNewName(names));
+    socket.on('join', (resp: {target: string, payload: any}) => this.onNewUserInRoom(resp));
     socket.on('chat', (msg: Message) => this.onChat(msg));
-    socket.on('users', (names: string[]) => this.onNewName(names));
-    socket.on('private', (msg: Message) => this.receivePrivateMsg(msg));
-    socket.on('room/chat', (msg: Message) => this.onRoomChat.emit(msg));
+    socket.on('private/get', (msg: Message) => this.receivePrivateMsg(msg));
+    socket.on('room/chat', (data: {target: string, payload: Message}) => this.onRoomChat.emit(data));
+    socket.on('close', () => console.warn('Lost connection!'));
   }
 
   sendMessage(msg: string) {
@@ -38,41 +45,46 @@ export class ChatService {
   }
 
   private onChat(msg: Message) {
-    this.publicMessages.push(msg);
-    this.onMessage.emit(this.publicMessages.slice());
+    this.onMessage.emit(msg);
   }
 
-  private onNewName(names: string[]) {
-    this.names = names.filter(name => name !== this.name);
-    this.onUserChange.emit(this.names.slice());
+  private onNewName(names: UserDTO[]) {
+    this.currentUsers = names;
+    this.onUserChange.emit(this.currentUsers.slice());
   }
 
-  sendPrivateMsg(target: string, msg: string) {
-    const message = new Message(this.name, msg);
-    this.updatePrivateMessages(target, message);
-    this.socket.send('private', new Message(target, msg));
+  sendPrivateMsg(target: number, msg: string) {
+    const message = {
+      name: target.toString(),
+      content: msg
+    };
+    this.socket.send('private/send', message, (id: number) => {
+      this.onPrivateMsg.emit({
+        id: target, message: new Message(
+          id, this.user.nickName, msg)
+      });
+    });
   }
 
-  sendToRoom(msg: string) {
-    this.socket.send('room/chat', msg);
+  sendToRoom(roomName: string, msg: string) {
+    const message = {
+      name: roomName,
+      content: msg
+    };
+    this.socket.send('room/chat', message);
   }
 
   joinRoom(room: string) {
-    this.socket.send('join', room);
+      this.socket.send('join', room);
   }
 
-  private updatePrivateMessages(target: string, message: Message) {
-    let prevMessages = this.privateMessages.get(target);
-    if (prevMessages == undefined) {
-      prevMessages = [message];
-      this.privateMessages.set(target, prevMessages);
-    } else {
-      prevMessages.push(message);
-    }
-    this.onPrivateMsg.emit({name: target, messages: prevMessages.slice()});
+  private receivePrivateMsg(message: Message) {
+    this.onPrivateMsg.emit({id: Number(message.name), message: new Message(
+      message.id, this.currentUsers.find(user => user.id === Number(message.name)).nickname, message.content
+      )});
   }
 
-  private receivePrivateMsg(msg: Message) {
-    this.updatePrivateMessages(msg.name, msg);
+  private onNewUserInRoom(resp: {target: string, payload: any}) {
+    this.usersInRooms.set(resp.target, resp.payload);
   }
 }

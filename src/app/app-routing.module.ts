@@ -5,10 +5,12 @@ import {MessageBoardComponent} from './chat/message-board/message-board.componen
 import {RouterModule, Routes} from '@angular/router';
 import {AuthGuard} from './services/auth-guard';
 import {WelcomeScreenComponent} from './welcome-screen/welcome-screen.component';
+import {UserDetailComponent} from './user-detail/user-detail.component';
 
 const routes: Routes = [
   {path: 'login', component: WelcomeScreenComponent},
   {path: 'callback', component: WelcomeScreenComponent},
+  {path: 'user-details', component: UserDetailComponent},
   {path: 'chat', component: ChatComponent, canActivate: [AuthGuard], children: [
       {path: '', component: MessageBoardComponent, pathMatch: 'full'},
       {path: ':name', component: MessageBoardComponent},

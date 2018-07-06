@@ -5,6 +5,8 @@ import {ActivatedRoute, Params} from '@angular/router';
 import {ChatService} from '../../services/chat.service';
 import {Subscription} from 'rxjs';
 import {AuthService} from '../../services/auth.service';
+import {User} from '../../models/user.model';
+import {ChatHistoryService} from '../../services/chat-history.service';
 
 @Component({
   selector: 'app-message-board',
@@ -14,18 +16,22 @@ import {AuthService} from '../../services/auth.service';
 export class MessageBoardComponent implements OnInit, OnDestroy {
 
   name: string;
-  target: string;
+  target: number;
   room: string;
   messages: Message[] = [];
   private channelSubscription: Subscription;
   private $chatWindow;
   @ViewChild('chatForm') chatForm: NgForm;
 
-  constructor(private route: ActivatedRoute, private chat: ChatService, private authService: AuthService) { }
+  constructor(
+    private route: ActivatedRoute,
+    private chat: ChatService,
+    private history: ChatHistoryService,
+    private authService: AuthService) { }
 
   ngOnInit() {
-    this.name = this.authService.userProfile ? this.authService.userProfile.givenName : '';
-    this.authService.userJoined.subscribe(name => this.name = name);
+    this.name = this.authService.userProfile ? this.authService.userProfile.nickName : '';
+    this.authService.userJoined.subscribe((user: User) => this.name = user.nickName);
     this.$chatWindow = document.querySelector('.chat-window');
 
     this.route.params.subscribe((params: Params) => {
@@ -34,7 +40,7 @@ export class MessageBoardComponent implements OnInit, OnDestroy {
         this.onPublicChat();
       }
       if (params && params['name']) {
-        this.onPrivateChat(params['name']);
+        this.onPrivateChat(Number(params['name']));
       }
       if (params && params['room']) {
         this.onRoomChat(params['room']);
@@ -43,35 +49,41 @@ export class MessageBoardComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.channelSubscription.unsubscribe();
+    if (this.channelSubscription) {
+      this.channelSubscription.unsubscribe();
+    }
   }
 
 
-  private onPublicChat() {
-    this.messages = this.chat.publicMessages;
-    this.channelSubscription = this.chat.onMessage.subscribe(messages => {
-      this.messages = messages;
-      setTimeout(() => this.$chatWindow.scrollTop = this.$chatWindow.scrollHeight, 100);
-    });
+  private async onPublicChat() {
+    this.messages = await this.history.fetchMessagesHistory();
+    // this.channelSubscription = this.chat.onMessage.subscribe(message => {
+    //   // this.messages.push(message);
+    //   setTimeout(() => this.$chatWindow.scrollTop = this.$chatWindow.scrollHeight, 100);
+    // });
   }
 
-  private onPrivateChat(target: string) {
+  private async onPrivateChat(target: number) {
     this.target = target;
-    this.messages = this.chat.privateMessages.get(target);
+    this.messages = await this.history.fetchPrivateMessageHistory(target);
+    // TODO: fresh messages might slip if there is a significant delay
     this.channelSubscription = this.chat.onPrivateMsg.subscribe(msg => {
-      if (msg.name === target) {
-        this.messages = msg.messages;
+      if (msg.id === target) {
+        this.messages.push(msg.message);
         setTimeout(() => this.$chatWindow.scrollTop = this.$chatWindow.scrollHeight, 100);
       }
     });
   }
 
-  private onRoomChat(room: string) {
+  private async onRoomChat(room: string) {
     this.room = room;
     this.chat.joinRoom(room);
-    this.channelSubscription = this.chat.onRoomChat.subscribe((msg: Message) => {
-      this.messages.push(msg);
-      setTimeout(() => this.$chatWindow.scrollTop = this.$chatWindow.scrollHeight, 100);
+    this.messages = await this.history.fetchRoomMessages(room);
+    this.channelSubscription = this.chat.onRoomChat.subscribe(msg => {
+      if (msg.target === room) {
+        this.messages.push(msg.payload);
+        setTimeout(() => this.$chatWindow.scrollTop = this.$chatWindow.scrollHeight, 100);
+      }
     });
   }
 
@@ -91,7 +103,7 @@ export class MessageBoardComponent implements OnInit, OnDestroy {
     if (this.target) {
       this.chat.sendPrivateMsg(this.target, msg);
     } else if (this.room) {
-      this.chat.sendToRoom(msg);
+      this.chat.sendToRoom(this.room, msg);
     } else {
       this.chat.sendMessage(msg);
     }
